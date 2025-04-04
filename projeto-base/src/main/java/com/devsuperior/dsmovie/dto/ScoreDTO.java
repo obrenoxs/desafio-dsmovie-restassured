@@ -21,6 +21,10 @@ public class ScoreDTO {
 	@Min(value = 0, message = "Valor mínimo 0")
 	@Max(value = 5, message = "Valor máximo 5")
 	private Double score;
+	
+	public ScoreDTO() {
+		
+	}
 
 	public ScoreDTO(Long movieId, Double score) {
 		this.movieId = movieId;
