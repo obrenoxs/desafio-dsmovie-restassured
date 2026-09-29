@@ -1,9 +1,7 @@
 package com.devsuperior.dsmovie.config;
 
-import java.util.Arrays;
-
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.security.autoconfigure.web.servlet.PathRequest;
+import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,6 +19,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
+
+import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
@@ -43,6 +43,7 @@ public class ResourceServerConfig {
 	@Bean
 	@Order(3)
 	public SecurityFilterChain rsSecurityFilterChain(HttpSecurity http) throws Exception {
+
 		http.csrf(csrf -> csrf.disable());
 		http.authorizeHttpRequests(authorize -> authorize.anyRequest().permitAll());
 		http.oauth2ResourceServer(oauth2ResourceServer -> oauth2ResourceServer.jwt(Customizer.withDefaults()));
@@ -78,7 +79,7 @@ public class ResourceServerConfig {
 	}
 
 	@Bean
-	FilterRegistrationBean<CorsFilter> filterRegistrationBeanCorsFilter() {
+	FilterRegistrationBean<CorsFilter> corsFilter() {
 		FilterRegistrationBean<CorsFilter> bean = new FilterRegistrationBean<>(
 				new CorsFilter(corsConfigurationSource()));
 		bean.setOrder(Ordered.HIGHEST_PRECEDENCE);
