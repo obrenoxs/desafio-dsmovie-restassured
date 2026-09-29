@@ -3,8 +3,12 @@ package com.devsuperior.dsmovie.controllers;
 import com.devsuperior.dsmovie.tests.TokenUtil;
 import io.restassured.http.ContentType;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import static io.restassured.RestAssured.baseURI;
 import static io.restassured.RestAssured.given;
@@ -27,6 +31,8 @@ public class MovieControllerRA {
 
 	private String movieTitle;
 
+	private Map<String, Object> postMovieInstance;
+
 	@BeforeEach
 	public void setUp() throws Exception {
 		baseURI = "http://localhost:8080";
@@ -44,6 +50,12 @@ public class MovieControllerRA {
 		clientToken = TokenUtil.obtainAccessToken(clientUsername, clientPassword);
 		adminToken = TokenUtil.obtainAccessToken(adminUsername, adminPassword);
 		invalidToken = adminToken + "xpto"; // Invalid Token
+
+		postMovieInstance = new HashMap<>();
+		postMovieInstance.put("title", "Test Movie Title");
+		postMovieInstance.put("score", 0.0);
+		postMovieInstance.put("count", 0);
+		postMovieInstance.put("image", "https://img.com/foo.jpg");
 	}
 
 	@Test
@@ -91,14 +103,48 @@ public class MovieControllerRA {
 	}
 	
 	@Test
-	public void insertShouldReturnUnprocessableEntityWhenAdminLoggedAndBlankTitle() throws JSONException {		
+	public void insertShouldReturnUnprocessableEntityWhenAdminLoggedAndBlankTitle() throws JSONException {
+		postMovieInstance.put("title", "");
+		JSONObject newMovie = new JSONObject(postMovieInstance);
+
+		given()
+				.header("Authorization","Bearer " + adminToken)
+				.body(newMovie.toString())
+				.contentType(ContentType.JSON)
+				.accept(ContentType.JSON)
+				.when()
+				.post("/movies")
+				.then()
+				.statusCode(422);
 	}
 	
 	@Test
 	public void insertShouldReturnForbiddenWhenClientLogged() throws Exception {
+		JSONObject newMovie = new JSONObject(postMovieInstance);
+
+		given()
+				.header("Authorization","Bearer " + clientToken)
+				.body(newMovie.toString())
+				.contentType(ContentType.JSON)
+				.accept(ContentType.JSON)
+				.when()
+				.post("/movies")
+				.then()
+				.statusCode(403);
 	}
 	
 	@Test
 	public void insertShouldReturnUnauthorizedWhenInvalidToken() throws Exception {
+		JSONObject newMovie = new JSONObject(postMovieInstance);
+
+		given()
+				.header("Authorization","Bearer " + invalidToken)
+				.body(newMovie.toString())
+				.contentType(ContentType.JSON)
+				.accept(ContentType.JSON)
+				.when()
+				.post("/movies")
+				.then()
+				.statusCode(401);
 	}
 }
